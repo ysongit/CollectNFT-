@@ -1,0 +1,36 @@
+html,
+body {
+  padding: 0;
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Oxygen,
+    Ubuntu, Cantarell, Fira Sans, Droid Sans, Helvetica Neue, sans-serif;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+.howitworks_p {
+  font-size: 2rem;
+  margin-top: 1rem;
+}
+
+.transactionHash {
+  margin-top: .7rem;
+  color: green;
+}
+
+.ant-upload.ant-upload-drag {
+  max-width: 500px;
+  height: 200px !important;
+}
+
+.Board {
+  min-height: 300px;
+  border: 2px solid black;
+} 
