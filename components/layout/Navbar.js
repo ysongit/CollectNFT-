@@ -1,6 +1,6 @@
 import React, { useState }  from 'react';
 import Link from 'next/link';
-import { Layout, Menu, Button } from 'antd';
+import { Layout, Menu, Tag, Button } from 'antd';
 import { ethers } from 'ethers';
 import Web3Modal from 'web3modal';
 
@@ -11,6 +11,7 @@ import CollectNFT from '../../artifacts/contracts/CollectNFT.sol/CollectNFT.json
 import CollectNFTV2 from '../../artifacts/contracts/CollectNFTV2.sol/CollectNFTV2.json';
 
 function Navbar({ walletAddress, setWalletAddress, setCollectContract, setProfileData, setCoinLabel, setChainScan }) {
+  const [networkType, setNetworkType] = useState("");
   const [loading, setLoading] = useState(false);
 
   const connectWallet = async () => {
@@ -37,24 +38,28 @@ function Navbar({ walletAddress, setWalletAddress, setCollectContract, setProfil
         contract = new ethers.Contract(process.env.NEXT_PUBLIC_COLLECTNFTADDRESS_BSC, CollectNFT.abi, signer);
         _coinLabel = "BNB";
         _chainScan = "https://testnet.bscscan.com/tx/";
+        setNetworkType("BNB Test");
       }
       else if(chainId === 4){
         console.log("Navbar", "Rinkeby");
         contract = new ethers.Contract(process.env.NEXT_PUBLIC_COLLECTNFTADDRESS_RINKEY, CollectNFT.abi, signer);
         _coinLabel = "ETH";
         _chainScan = "https://rinkeby.etherscan.io/tx/";
+        setNetworkType("Rinkeby");
       }
       else if(chainId === 80001){
         console.log("Navbar", "Mumbai");
         contract = new ethers.Contract(process.env.NEXT_PUBLIC_COLLECTNFTADDRESS_MUMBAI, CollectNFT.abi, signer);
         _coinLabel = "MATIC";
         _chainScan = "https://mumbai.polygonscan.com/tx/";
+        setNetworkType("Mumbai");
       }
       else if(chainId === 588){
         console.log("Navbar", "Metis");
         contract = new ethers.Contract(process.env.NEXT_PUBLIC_COLLECTNFTADDRESS_METIS, CollectNFTV2.abi, signer);
         _coinLabel = "METIS";
-        _chainScan = "https://stardust-explorer.metis.io/";
+        _chainScan = "https://stardust-explorer.metis.io/tx/";
+        setNetworkType("Stardust");
       }
       else{
         alert("No contract for this network, try Rinkeby, Polygon (Matic) Mumbai, Metis, and Binance Smart Chain Testnet");
@@ -116,6 +121,7 @@ function Navbar({ walletAddress, setWalletAddress, setCollectContract, setProfil
           </Link>
         </Menu.Item>
       </Menu>
+      {networkType && <Tag color="blue">{networkType}</Tag>}
       <Button
         style={{ margin: '0 1rem'}}
         type="primary"

@@ -2,7 +2,9 @@
 pragma solidity ^0.6.12;
 pragma experimental ABIEncoderV2;
 
-contract CollectNFTV2 {
+import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
+
+contract CollectNFTV2 is ERC721 {
     uint public poolCount = 0;
     mapping(uint => Pool) public pools;
     
@@ -16,7 +18,7 @@ contract CollectNFTV2 {
     
     mapping(uint => bool) private redeemCodeList;
     
-    constructor() public{}
+    constructor() ERC721("NFT Bingo", "NFTB")  public {}
     
     struct Pool {
         uint id;
@@ -72,6 +74,12 @@ contract CollectNFTV2 {
         uint amount,
         address payable from
     );
+
+    event NFTMinted (
+      uint tokenId,
+      string url,
+      address payable from
+  );
     
     function createPool(string memory _collectionName, string memory _creatorName, string memory _description, string[] memory _urls, uint _arrLength) external {
         poolCount++;
@@ -217,6 +225,14 @@ contract CollectNFTV2 {
             return true;
         }
         else return false;
+    }
+
+    function mintCollectionNFT(string memory _url) external {
+        uint _tokenId = totalSupply().add(1);
+        _safeMint(msg.sender, _tokenId);
+        _setTokenURI(_tokenId, _url);
+
+        emit NFTMinted(_tokenId, _url, msg.sender);
     }
     
     /** 

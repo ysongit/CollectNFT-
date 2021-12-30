@@ -30,7 +30,7 @@ export default function Lootbox({ collectContract, coinLabel, chainScan }) {
       console.log(tx);
 
       setTransactionHash(tx.transactionHash);
-      setPieceWonList(tx.events[4] ? tx.events[4].args[0] : tx.events[3].args[0]);
+      setPieceWonList(tx.events[4] ? tx.events[4].args[0] : tx.events[3] ? tx.events[3].args[0] : tx.events[0].args[0] );
       setLootBoxLoading(false);
       console.log(tx.events[4].args[0]);
     } catch(error) {

@@ -16,6 +16,8 @@ export default function CollectionDetail({ walletAddress, collectContract, profi
   const [code, setCode] = useState("");
   const [codeInput, setCodeInput] = useState("");
   const [redeemStatus, setRedeemStatus] = useState("");
+  const [pieceWon, setPieceWon] = useState("");
+  const [image, setImage] = useState("");
   const [isWinnerText, setIsWinnerText] = useState("");
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [fundTransactionHash, setFundTransactionHash] = useState("");
@@ -45,6 +47,17 @@ export default function CollectionDetail({ walletAddress, collectContract, profi
 
     if(collectContract) getCollectionData();
   }, [collectContract])
+
+  useEffect(() => {
+    if(pieceWon) getImageFromContract();
+  }, [pieceWon])
+
+  async function getImageFromContract(){
+    const imageURL = await collectContract.images(pieceWon);
+
+    console.log(imageURL);
+    setImage(imageURL.url);
+  }
 
   async function claimPrize() {
     try{
@@ -101,6 +114,8 @@ export default function CollectionDetail({ walletAddress, collectContract, profi
       const tx = await transaction.wait();
       console.log(tx);
 
+      setPieceWon(tx?.events[0]?.args?.imageId.toString() || '');
+
       const isSuccess = await collectContract.callStatic.createCode();
 
       if(isSuccess) setRedeemStatus("Success");
@@ -123,9 +138,11 @@ export default function CollectionDetail({ walletAddress, collectContract, profi
           <p>Owner {collection.creatorName && collection.creatorName.toString()} ({collection.owner && collection.owner.toString()})</p>
         </div>
         
-        <Button type="primary" size="large"  onClick={() => router.push(`/collection/${id}/add-image`)}>
-          Add Image to Collection
-        </Button>
+        {collection.owner && collection.owner.toString() === walletAddress && (
+          <Button type="primary" size="large"  onClick={() => router.push(`/collection/${id}/add-image`)}>
+            Add Image to Collection
+          </Button>
+        )}
       </div>
       
       <p>{collection.description && collection.description.toString()}</p>
@@ -170,10 +187,10 @@ export default function CollectionDetail({ walletAddress, collectContract, profi
         </p>
       </center>
 
-      <Divider>Earn a Piece</Divider>
+      {collection.owner && collection.owner.toString() === walletAddress && (
+        <center>
+          <Divider>Redeem Code</Divider>
 
-      <Row style={{ margin: '2rem 0'}}>
-        <Col span={12}>
           <h3>Create Redeem Code</h3>
           <Button type="primary" onClick={createCode} loading={createCodeLoading}>
             Create
@@ -186,29 +203,29 @@ export default function CollectionDetail({ walletAddress, collectContract, profi
               <p>{code}</p>
             </>
           )}
-          
-        </Col>
+        </center>
+      )}
 
-        <Col span={12}>
-          <Form.Item
-            name="code"
-            style={{ maxWidth: '500px'}}
-          >
-            <h3>Enter Code</h3>
-            <Input onChange={(e) => setCodeInput(e.target.value)} />
-          </Form.Item>
-          <Button type="primary" size="large" onClick={redeemCode} loading={redeemLoading}>
-            Submit
-          </Button>
+      <Divider>Earn a Piece</Divider>
 
-          <br />
-          <br />
+      <center>
+        <Form.Item
+          name="code"
+          style={{ maxWidth: '500px'}}
+        >
+          <h3>Enter Code</h3>
+          <Input onChange={(e) => setCodeInput(e.target.value)} />
+        </Form.Item>
+        <Button type="primary" size="large" onClick={redeemCode} loading={redeemLoading}>
+          Submit
+        </Button>
 
-          {redeemStatus && <p>{redeemStatus}</p>}
-          
-        </Col>
-      </Row>
-        
+        <br />
+        <br />
+
+        {redeemStatus && <p>{redeemStatus}</p>}
+        {image && <img src={image} alt="Piece" width={300}/>}
+      </center>
 
       <Divider>Comments</Divider>
 

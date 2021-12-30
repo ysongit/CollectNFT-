@@ -1,12 +1,15 @@
 import React, { useState } from "react";
 import { Row, Col, Card, Button } from 'antd';
 import { useDrop } from "react-dnd";
+import { Web3Storage } from 'web3.storage';
 import * as htmlToImage from 'html-to-image';
 
 import Picture from "../common/Picture";
+const client = new Web3Storage({ token: process.env.NEXT_PUBLIC_WEB3STORAGE_APIKEY });
 
-function MintNFT({ myPublicCollage, walletAddress }) {
+function MintNFT({ myPublicCollage, walletAddress, collectContract, chainScan }) {
   const [board, setBoard] = useState([]);
+  const [transactionHash, setTransactionHash] = useState('');
   const [transactionUrl, setTransactionUrl] = useState('');
   const [loading, setLoading] = useState(false);
 
@@ -36,24 +39,21 @@ function MintNFT({ myPublicCollage, walletAddress }) {
       const form = new FormData();
       form.append('file', imageData);
 
-      const options = {
-        method: 'POST',
-        body: form,
-        headers: {
-          "Authorization": process.env.NEXT_PUBLIC_NFTPORT_APIKEY,
+      const cid = await client.put([imageData], {
+        onRootCidReady: localCid => {
+          console.log(`> 🔑 locally calculated Content ID: ${localCid} `)
+          console.log('> 📡 sending files to web3.storage ')
         },
-      };
+        onStoredChunk: bytes => console.log(`> 🛰 sent ${bytes.toLocaleString()} bytes to web3.storage`)
+      })
+      console.log(`https://dweb.link/ipfs/${cid}/${imageData.name}`);
+      const newURL = `https://dweb.link/ipfs/${cid}/${imageData.name}`;
 
-      const response = await fetch("https://api.nftport.xyz/easy_mint?" + new URLSearchParams({
-        chain: 'polygon',
-        name: "My Public Collage",
-        description: "It is my public collage",
-        mint_to_address: walletAddress,
-      }), options);
+      const transaction = await collectContract.mintCollectionNFT(newURL);
+      const tx = await transaction.wait();
+      console.log(tx);
 
-      const json = await response.json();
-      console.log(json);
-      setTransactionUrl(json.transaction_external_url);
+      setTransactionHash(tx.transactionHash);
       setLoading(false);
     } catch(error) {
       console.error(error);
@@ -110,6 +110,14 @@ function MintNFT({ myPublicCollage, walletAddress }) {
             Success, see transaction {" "}
             <a href={transactionUrl} target="_blank" rel="noopener noreferrer">
               {transactionUrl}
+            </a>
+          </p>
+        }
+        {transactionHash &&
+          <p className="transactionHash">
+            Success, see transaction {" "}
+            <a href={`${chainScan}${transactionHash}`} target="_blank" rel="noopener noreferrer">
+              {transactionHash.substring(0, 10) + '...' + transactionHash.substring(56, 66)}
             </a>
           </p>
         }

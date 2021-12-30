@@ -10,7 +10,7 @@ import MyPublicCollage from '../components/myaccount/MyPublicCollage';
 import MintNFT from '../components/myaccount/MintNFT';
 import MyProfile from '../components/myaccount/MyProfile';
 
-export default function MyAccount({ walletAddress, collectContract, profileData, setProfileData }) {
+export default function MyAccount({ walletAddress, collectContract, profileData, setProfileData, chainScan }) {
   const router = useRouter();
   const { id } = router.query;
   let content;
@@ -58,12 +58,12 @@ export default function MyAccount({ walletAddress, collectContract, profileData,
       content = <MyCollection imageList={imageList} myPublicCollage={myPublicCollage} setMyPublicCollage={setMyPublicCollage} />;
       break;
     case "My Public Collage":
-      content = <MyPublicCollage walletAddress={walletAddress} />
+      content = <MyPublicCollage walletAddress={walletAddress} collectContract={collectContract} />
       break;
     case "Mint NFT":
       content = (
         <DndProvider backend={HTML5Backend}>
-          <MintNFT myPublicCollage={myPublicCollage} walletAddress={walletAddress} />
+          <MintNFT myPublicCollage={myPublicCollage} walletAddress={walletAddress} collectContract={collectContract} chainScan={chainScan} />
         </DndProvider>
       );
       break;
